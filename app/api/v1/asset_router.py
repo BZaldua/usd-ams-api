@@ -1,5 +1,6 @@
 from typing import Annotated
 
+from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 
 from app.schemas import (
@@ -9,13 +10,17 @@ from app.schemas import (
     ResolveFilterDTO,
     ResolveFilterResponseDTO,
 )
+from app.services import AssetService
 
 router = APIRouter()
 
 
-@router.post("/assets", status_code=status.HTTP_201_CREATED)
-def add_asset(asset_in: AssetCreateDTO):
-    return {"status": "OK", "message": "Asset added"}
+@router.post(
+    "/assets", status_code=status.HTTP_201_CREATED, response_model=AssetCreateDTO
+)
+@inject
+def add_asset(asset_in: AssetCreateDTO, asset_service: FromDishka[AssetService]):
+    return asset_service.create(asset_in)
 
 
 @router.post(
