@@ -15,7 +15,7 @@ build/
 # ==============================================================================
 .env
 .env.*
-!.env.example # Permite subir una plantilla de ejemplo sin datos reales
+!.env.example
 
 # ==============================================================================
 # 💻 Virtual Environments
