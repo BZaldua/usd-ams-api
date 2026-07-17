@@ -1,7 +1,10 @@
+from dishka import make_async_container
+from dishka.integrations.fastapi import setup_dishka
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from app.api.v1.asset_router import router as asset_router
+from app.container import AppProvider
 
 load_dotenv()
 
@@ -12,3 +15,6 @@ app = FastAPI(
 )
 
 app.include_router(asset_router, prefix="/api/v1", tags=["Assets"])
+
+container = make_async_container(AppProvider())
+setup_dishka(container, app)
