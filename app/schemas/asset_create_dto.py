@@ -1,5 +1,7 @@
+from pydantic import Field
+
 from .base import AssetBase
 
 
 class AssetCreateDTO(AssetBase):
-    pass
+    type: str = Field(description="Type of asset", examples=["Prop"])
