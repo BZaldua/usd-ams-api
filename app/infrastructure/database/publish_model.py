@@ -35,6 +35,6 @@ class Publish(Base):
         "Variant", back_populates="publishes", cascade="all, delete-orphan"
     )
 
-    __table_args__ = UniqueConstraint(
+    __tableargs__ = UniqueConstraint(
         "asset_id", "task_id", "version", name="uq_asset_task_version"
     )
