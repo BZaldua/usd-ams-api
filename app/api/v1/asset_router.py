@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from dishka.integrations.fastapi import FromDishka, inject
@@ -14,13 +15,18 @@ from app.services import AssetService
 
 router = APIRouter()
 
+logger = logging.getLogger(__name__)
+
 
 @router.post(
     "/assets", status_code=status.HTTP_201_CREATED, response_model=AssetCreateDTO
 )
 @inject
-def add_asset(asset_in: AssetCreateDTO, asset_service: FromDishka[AssetService]):
-    return asset_service.create(asset_in)
+async def add_asset(asset_in: AssetCreateDTO, asset_service: FromDishka[AssetService]):
+    logger.info(f"Creating new asset: {asset_in}")
+    result = await asset_service.create(asset_in)
+    logger.debug(f"Asset creation result: {result}")
+    return result
 
 
 @router.post(
