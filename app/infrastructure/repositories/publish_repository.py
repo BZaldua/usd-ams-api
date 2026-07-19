@@ -29,5 +29,5 @@ class PublishRepository(BaseRepository):
             .order_by(Publish.version.desc())
             .limit(1)
         )
-        result = await self.publish: Publish.execute(query)
+        result: Publish = await self.db.execute(query)
         return result.scalars().first()
