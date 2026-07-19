@@ -18,11 +18,6 @@ class PublishRepository(BaseRepository):
         latest = result.scalars().first()
         return latest if latest is not None else 0
 
-    async def create(self, publish: Publish) -> Publish:
-        self.db.add(publish)
-        await self.db.flush()
-        return publish
-
     async def get_latest_publish_path(
         self, asset_name: str, task_name: str
     ) -> Optional[str]:

@@ -10,8 +10,3 @@ class AssetRepository(BaseRepository):
     async def get_by_name(self, name: str) -> Optional[Asset]:
         result = await self.db.execute(select(Asset).where(Asset.name == name))
         return result.scalars().first()
-
-    async def create(self, asset: Asset) -> Asset:
-        self.db.add(asset)
-        await self.db.flush()
-        return asset
