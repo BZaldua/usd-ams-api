@@ -21,7 +21,9 @@ class Publish(Base):
     asset_id = Column(
         Integer, ForeignKey("assets.id", ondelete="CASCADE"), nullable=False
     )
-    task_id = Column(Integer, ForeignKey("task.id"), nullable=False)
+    task_id = Column(
+        Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False
+    )
     version = Column(Integer, nullable=False, default=1)
     fs_path = Column(Text, nullable=False)
     created_at = Column(
