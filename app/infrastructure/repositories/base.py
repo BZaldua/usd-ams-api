@@ -1,5 +1,6 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class BaseRepository:
@@ -9,5 +10,5 @@ class BaseRepository:
     async def add(self, model: Any) -> Any:
         self.db.add(model)
         await self.db.flush()
-        await self.db.refresh(model) 
+        await self.db.refresh(model)
         return model
