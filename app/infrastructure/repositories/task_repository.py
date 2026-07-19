@@ -9,5 +9,5 @@ from app.infrastructure.repositories.base import BaseRepository
 class TaskRepository(BaseRepository):
     async def get_by_name(self, name: str) -> Optional[Task]:
         query = select(Task).where(Task.name == name)
-        result = await self.session.execute(query)
+        result = await self.db.execute(query)
         return result.scalars().first()

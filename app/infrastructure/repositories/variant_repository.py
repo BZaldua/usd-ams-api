@@ -13,11 +13,11 @@ class VariantRepository(BaseRepository):
         db_variant = Variant(
             publish_id=publish_id, variant_set=variant_set, variant_name=variant_name
         )
-        self.session.add(db_variant)
-        await self.session.flush()
+        self.db.add(db_variant)
+        await self.db.flush()
         return db_variant
 
     async def get_by_publish_id(self, publish_id: int) -> List[Variant]:
         query = select(Variant).where(Variant.publish_id == publish_id)
-        result = await self.session.execute(query)
+        result = await self.db.execute(query)
         return list(result.scalars().all())

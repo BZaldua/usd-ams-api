@@ -14,7 +14,7 @@ class PublishRepository(BaseRepository):
             .order_by(Publish.version.desc())
             .limit(1)
         )
-        result = await self.session.execute(query)
+        result = await self.db.execute(query)
         latest = result.scalars().first()
         return latest if latest is not None else 0
 
@@ -28,8 +28,8 @@ class PublishRepository(BaseRepository):
             fs_path=fs_path,
             author=author,
         )
-        self.session.add(db_publish)
-        await self.session.flush()
+        self.db.add(db_publish)
+        await self.db.flush()
         return db_publish
 
     async def get_latest_publish_path(
@@ -43,5 +43,5 @@ class PublishRepository(BaseRepository):
             .order_by(Publish.version.desc())
             .limit(1)
         )
-        result = await self.session.execute(query)
+        result = await self.db.execute(query)
         return result.scalars().first()
