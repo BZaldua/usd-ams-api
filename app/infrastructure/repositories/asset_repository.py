@@ -11,8 +11,7 @@ class AssetRepository(BaseRepository):
         result = await self.db.execute(select(Asset).where(Asset.name == name))
         return result.scalars().first()
 
-    async def create(self, asset_name: str, asset_type: str) -> Asset:
-        db_asset = Asset(name=asset_name, type=asset_type)
-        self.db.add(db_asset)
+    async def create(self, asset: Asset) -> Asset:
+        self.db.add(asset)
         await self.db.flush()
-        return db_asset
+        return asset
