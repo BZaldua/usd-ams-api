@@ -18,3 +18,8 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     command: server /data --console-address ":9001"
+
+  redis:
+    image: redis/8-alpine
+    ports:
+      - "6379:6379"
