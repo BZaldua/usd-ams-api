@@ -34,7 +34,7 @@ class Publish(Base):
     asset = relationship("Asset", back_populates="publishes")
     task = relationship("Task", back_populates="publishes")
     variants = relationship(
-        "Variant", back_populates="publishes", cascade="all, delete-orphan"
+        "Variant", back_populates="publish", cascade="all, delete-orphan"
     )
 
     __tableargs__ = UniqueConstraint(

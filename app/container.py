@@ -2,8 +2,8 @@ from dishka import Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .config.database import get_db
-from .infrastructure.repositories import AssetRepository
-from .services import AssetService
+from .infrastructure.repositories import AssetRepository, TaskRepository
+from .services import AssetService, TaskService
 
 
 class AppProvider(Provider):
@@ -17,3 +17,11 @@ class AppProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def get_asset_repository(self, db_session: AsyncSession) -> AssetRepository:
         return AssetRepository(db_session)
+
+    @provide(scope=Scope.REQUEST)
+    def get_task_service(self, repository: TaskRepository) -> TaskService:
+        return TaskService(repository)
+
+    @provide(scope=Scope.REQUEST)
+    def get_task_repository(self, db_session: AsyncSession) -> TaskRepository:
+        return TaskRepository(db_session)

@@ -1,0 +1,13 @@
+from app.infrastructure.database import Task
+from app.infrastructure.repositories import TaskRepository
+from app.schemas import TaskTypeResponseDTO, TaskTypesResponseDTO
+
+
+class TaskService:
+    def __init__(self, task_repo: TaskRepository):
+        self.repository = task_repo
+
+    async def get_types(self) -> TaskTypesResponseDTO:
+        task_lst: list[Task] = await self.repository.get_all()
+        types = [TaskTypeResponseDTO(id=task.id, name=task.name) for task in task_lst]
+        return TaskTypesResponseDTO(types=types)
