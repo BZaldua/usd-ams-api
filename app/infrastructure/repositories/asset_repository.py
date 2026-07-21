@@ -7,6 +7,6 @@ from app.infrastructure.repositories.base import BaseRepository
 
 
 class AssetRepository(BaseRepository):
-    async def get_by_name(self, name: str) -> Optional[Asset]:
-        result = await self.db.execute(select(Asset).where(Asset.name == name))
+    async def get_by_id(self, id: int) -> Optional[Asset]:
+        result = await self.db.execute(select(Asset).where(Asset.id == id))
         return result.scalars().first()

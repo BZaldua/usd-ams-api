@@ -12,6 +12,6 @@ class AssetService:
         _ = await self.repository.add(asset_model)
         return asset_dto
 
-    async def get_by_name(self, name: str) -> AssetCreateDTO:
-        asset_model: Asset = await self.repository.get_by_name(name)
+    async def get_by_id(self, id: int) -> AssetCreateDTO:
+        asset_model: Asset = await self.repository.get_by_id(id)
         return AssetCreateDTO(name=asset_model.name, type=asset_model.type)

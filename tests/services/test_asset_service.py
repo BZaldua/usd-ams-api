@@ -34,7 +34,7 @@ async def test_create_returns_successfully():
 
 
 @pytest.mark.asyncio
-async def test_get_by_name_successfully():
+async def test_get_by_id_successfully():
     # Arrange
     mock_model = MagicMock(spec=Asset)
     mock_model.id = 2
@@ -42,15 +42,15 @@ async def test_get_by_name_successfully():
     mock_model.type = "Prop"
 
     mock_repo = MagicMock()
-    mock_repo.get_by_name = AsyncMock(return_value=mock_model)
+    mock_repo.get_by_id = AsyncMock(return_value=mock_model)
 
     service = AssetService(mock_repo)
 
     # Act
-    result = await service.get_by_name("Box")
+    result = await service.get_by_id(2)
 
     # Assert
-    mock_repo.get_by_name.assert_called_once()
+    mock_repo.get_by_id.assert_called_once()
 
     assert isinstance(result, AssetCreateDTO)
     assert result.name == "Box"
