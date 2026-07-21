@@ -19,7 +19,9 @@ logger = logging.getLogger(__name__)
 
 
 @router.post(
-    "/assets", status_code=status.HTTP_201_CREATED, response_model=AssetCreateDTO
+    "/assets", 
+    status_code=status.HTTP_201_CREATED, 
+    response_model=AssetCreateDTO
 )
 @inject
 async def add_asset(asset_in: AssetCreateDTO, asset_service: FromDishka[AssetService]):
@@ -30,12 +32,11 @@ async def add_asset(asset_in: AssetCreateDTO, asset_service: FromDishka[AssetSer
 
 
 @router.post(
-    "/assets/{asset_name}/publish",
+    "/assets/publish",
     status_code=status.HTTP_200_OK,
     response_model=AssetPublishResponseDTO,
 )
 def publish_asset(
-    asset_name: str,
     asset_content: AssetPublishDTO = Depends(AssetPublishDTO.as_form),
     asset_file: UploadFile = File(...),
 ):

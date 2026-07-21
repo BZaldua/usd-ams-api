@@ -1,17 +1,19 @@
 from fastapi import Form
 from pydantic import BaseModel, Field
 
-from .base import TaskType
-
 
 class AssetPublishDTO(BaseModel):
-    task: TaskType = Field(
-        ..., description="Task where asset was created", examples=["Modeling"]
-    )
+    asset_id: int = Field(..., description="Asset ID")
+    task_id: int = Field(..., description="Task ID")
     is_variant: bool = Field(default=False)
+    author: str = Field(description="Author's name")
 
     @classmethod
     def as_form(
-        cls, task: TaskType = Form(...), is_variant: bool = Form(...)
-    ) -> AssetPublishDTO:
-        return cls(task, is_variant)
+        cls, 
+        asset_id: int = Form(..., description="Asset ID"),
+        task_id: int = Form(..., description="Task ID"),
+        is_variant: bool = Form(default=False),
+        author: str = Form(None, description="Author's name")
+    ) -> "AssetPublishDTO":
+        return cls(asset_id, task_id, is_variant, author)
