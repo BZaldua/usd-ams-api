@@ -2,8 +2,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from app.exceptions import TaskNotFoundException
 from app.infrastructure.database import Task
-from app.schemas import TaskTypesResponseDTO
+from app.schemas import TaskTypeResponseDTO, TaskTypesResponseDTO
 from app.services import TaskService
 
 
@@ -56,3 +57,44 @@ async def test_get_types_empty_list():
     mock_repo.get_all.assert_called_once()
     assert isinstance(result, TaskTypesResponseDTO)
     assert len(result.types) == 0
+
+
+@pytest.mark.asyncio
+async def test_get_by_id_successfully():
+    # Arrange
+    mock_task = MagicMock(spec=Task)
+    mock_task.id = 4
+    mock_task.name = "Lighting"
+
+    mock_repo = MagicMock()
+    mock_repo.get_by_id = AsyncMock(return_value=mock_task)
+
+    service = TaskService(mock_repo)
+
+    # Act
+    result = await service.get_by_id(4)
+
+    # Assert
+    mock_repo.get_by_id.assert_called_once()
+
+    assert isinstance(result, TaskTypeResponseDTO)
+    assert result.id == 4
+    assert result.name == "Lighting"
+
+
+@pytest.mark.asyncio
+async def test_get_by_id_should_raise_task_not_found_exception_when_task_does_not_exist():
+    # Arrange
+    repository_mock = MagicMock()
+    repository_mock.get_by_id = AsyncMock(return_value=None)
+
+    service = TaskService(repository_mock)
+    task_id = 99
+
+    # Act + Assert
+    with pytest.raises(TaskNotFoundException) as exc_info:
+        await service.get_by_id(task_id)
+
+    repository_mock.get_by_id.assert_called_once_with(task_id)
+
+    assert str(task_id) in str(exc_info.value)
