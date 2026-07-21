@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from app.exceptions import AssetNotFoundException
 from app.infrastructure.database import Asset
 from app.schemas import AssetCreateDTO
 from app.services import AssetService
@@ -55,3 +56,21 @@ async def test_get_by_id_successfully():
     assert isinstance(result, AssetCreateDTO)
     assert result.name == "Box"
     assert result.type == "Prop"
+
+
+@pytest.mark.asyncio
+async def test_get_by_id_should_raise_asset_not_found_exception_when_asset_does_not_exist():
+    # Arrange
+    repository_mock = MagicMock()
+    repository_mock.get_by_id = AsyncMock(return_value=None)
+
+    service = AssetService(repository_mock)
+    asset_id = 99
+
+    # Act + Assert
+    with pytest.raises(AssetNotFoundException) as exc_info:
+        await service.get_by_id(asset_id)
+
+    repository_mock.get_by_id.assert_called_once_with(asset_id)
+
+    assert str(asset_id) in str(exc_info.value)
