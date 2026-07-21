@@ -8,10 +8,10 @@ class AssetService:
         self.repository = asset_repo
 
     async def create(self, asset_dto: AssetCreateDTO) -> AssetCreateDTO:
-        asset_model = Asset(name=asset_dto.asset_name, type=asset_dto.type)
+        asset_model = Asset(name=asset_dto.name, type=asset_dto.type)
         _ = await self.repository.add(asset_model)
         return asset_dto
 
     async def get_by_name(self, name: str) -> AssetCreateDTO:
         asset_model: Asset = await self.repository.get_by_name(name)
-        return AssetCreateDTO(asset_name=asset_model.name, type=asset_model.type)
+        return AssetCreateDTO(name=asset_model.name, type=asset_model.type)
