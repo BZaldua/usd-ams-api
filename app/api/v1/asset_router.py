@@ -11,7 +11,7 @@ from app.schemas import (
     ResolveFilterDTO,
     ResolveFilterResponseDTO,
 )
-from app.services import AssetService
+from app.services import AssetService, PublishService
 
 router = APIRouter()
 
@@ -19,9 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.post(
-    "/assets", 
-    status_code=status.HTTP_201_CREATED, 
-    response_model=AssetCreateDTO
+    "/assets", status_code=status.HTTP_201_CREATED, response_model=AssetCreateDTO
 )
 @inject
 async def add_asset(asset_in: AssetCreateDTO, asset_service: FromDishka[AssetService]):
@@ -36,11 +34,16 @@ async def add_asset(asset_in: AssetCreateDTO, asset_service: FromDishka[AssetSer
     status_code=status.HTTP_200_OK,
     response_model=AssetPublishResponseDTO,
 )
-def publish_asset(
+@inject
+async def publish_asset(
+    publish_service: FromDishka[PublishService],
     asset_content: AssetPublishDTO = Depends(AssetPublishDTO.as_form),
     asset_file: UploadFile = File(...),
 ):
-    return {"status": "OK", "message": "Asset published"}
+    logger.info(f"Publish new content: {asset_content}")
+    result = await publish_service.create(asset_content)
+    logger.debug(f"Publish result: {result}")
+    return result
 
 
 @router.get(
