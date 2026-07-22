@@ -1,5 +1,5 @@
 from app.api.v1.schemas import AssetPublishDTO, AssetPublishResponseDTO
-from app.infrastructure.database import Publish
+from app.infrastructure.database import PublishModel
 from app.infrastructure.repositories import PublishRepository
 
 from .asset_service import AssetService
@@ -25,7 +25,7 @@ class PublishService:
             publish_dto.asset_id, publish_dto.task_id
         )
 
-        publish = Publish(
+        publish = PublishModel(
             asset_id=publish_dto.asset_id,
             task_id=publish_dto.task_id,
             version=latest_version + 1,
@@ -33,7 +33,7 @@ class PublishService:
             fs_path="PATH",  # TODO: set a valid path
         )
 
-        published_model: Publish = await self.repository.add(publish)
+        published_model: PublishModel = await self.repository.add(publish)
 
         return AssetPublishResponseDTO(
             name=asset.name,

@@ -4,7 +4,7 @@ import pytest
 
 from app.api.v1.schemas import AssetCreateDTO
 from app.exceptions import AssetNotFoundException
-from app.infrastructure.database import Asset
+from app.infrastructure.database import AssetModel
 from app.services import AssetService
 
 
@@ -13,7 +13,7 @@ async def test_create_returns_successfully():
     # Arrange
     request: AssetCreateDTO = AssetCreateDTO(name="Hero", type="Character")
 
-    mock_model = MagicMock(spec=Asset)
+    mock_model = MagicMock(spec=AssetModel)
     mock_model.id = 1
     mock_model.name = "Hero"
     mock_model.type = "Character"
@@ -37,7 +37,7 @@ async def test_create_returns_successfully():
 @pytest.mark.asyncio
 async def test_get_by_id_successfully():
     # Arrange
-    mock_model = MagicMock(spec=Asset)
+    mock_model = MagicMock(spec=AssetModel)
     mock_model.id = 2
     mock_model.name = "Box"
     mock_model.type = "Prop"

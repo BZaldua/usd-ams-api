@@ -4,18 +4,18 @@ import pytest
 
 from app.api.v1.schemas import TaskTypeResponseDTO, TaskTypesResponseDTO
 from app.exceptions import TaskNotFoundException
-from app.infrastructure.database import Task
+from app.infrastructure.database import TaskModel
 from app.services import TaskService
 
 
 @pytest.mark.asyncio
 async def test_get_types_returns_successfully():
     # Arrange
-    mock_task_1 = MagicMock(spec=Task)
+    mock_task_1 = MagicMock(spec=TaskModel)
     mock_task_1.id = 1
     mock_task_1.name = "Rigging"
 
-    mock_task_2 = MagicMock(spec=Task)
+    mock_task_2 = MagicMock(spec=TaskModel)
     mock_task_2.id = 2
     mock_task_2.name = "Animation"
 
@@ -62,7 +62,7 @@ async def test_get_types_empty_list():
 @pytest.mark.asyncio
 async def test_get_by_id_successfully():
     # Arrange
-    mock_task = MagicMock(spec=Task)
+    mock_task = MagicMock(spec=TaskModel)
     mock_task.id = 4
     mock_task.name = "Lighting"
 

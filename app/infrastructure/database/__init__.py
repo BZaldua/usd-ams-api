@@ -1,13 +1,13 @@
-from .asset_model import Asset
+from .asset_model import AssetModel
 from .base import Base
-from .publish_model import Publish
-from .task_model import Task
-from .variant_model import Variant
+from .publish_model import PublishModel
+from .task_model import TaskModel
+from .variant_model import VariantModel
 
 __all__ = [
     "Base",
-    "Asset",
-    "Task",
-    "Publish",
-    "Variant",
+    "AssetModel",
+    "TaskModel",
+    "PublishModel",
+    "VariantModel",
 ]

@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from app.infrastructure.database.base import Base
 
 
-class Variant(Base):
+class VariantModel(Base):
     __tablename__ = "variants"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -14,7 +14,7 @@ class Variant(Base):
     variant_set = Column(String(100), nullable=False)
     variant_name = Column(String(100), nullable=False)
 
-    publish = relationship("Publish", back_populates="variants")
+    publish = relationship("PublishModel", back_populates="variants")
 
     __tableargs__ = UniqueConstraint(
         "publish_id", "variant_set", "variant_name", name="uq_publish_variant_set_name"

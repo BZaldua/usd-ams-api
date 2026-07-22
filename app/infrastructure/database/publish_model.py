@@ -14,7 +14,7 @@ from sqlalchemy.orm import relationship
 from app.infrastructure.database.base import Base
 
 
-class Publish(Base):
+class PublishModel(Base):
     __tablename__ = "publishes"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -31,10 +31,10 @@ class Publish(Base):
     )
     author = Column(String(255), nullable=True)
 
-    asset = relationship("Asset", back_populates="publishes")
-    task = relationship("Task", back_populates="publishes")
+    asset = relationship("AssetModel", back_populates="publishes")
+    task = relationship("TaskModel", back_populates="publishes")
     variants = relationship(
-        "Variant", back_populates="publish", cascade="all, delete-orphan"
+        "VariantModel", back_populates="publish", cascade="all, delete-orphan"
     )
 
     __tableargs__ = UniqueConstraint(

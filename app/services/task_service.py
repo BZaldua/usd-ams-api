@@ -1,6 +1,6 @@
 from app.api.v1.schemas import TaskTypeResponseDTO, TaskTypesResponseDTO
 from app.exceptions import TaskNotFoundException
-from app.infrastructure.database import Task
+from app.infrastructure.database import TaskModel
 from app.infrastructure.repositories import TaskRepository
 
 
@@ -9,12 +9,12 @@ class TaskService:
         self.repository = task_repo
 
     async def get_types(self) -> TaskTypesResponseDTO:
-        task_lst: list[Task] = await self.repository.get_all()
+        task_lst: list[TaskModel] = await self.repository.get_all()
         types = [TaskTypeResponseDTO(id=task.id, name=task.name) for task in task_lst]
         return TaskTypesResponseDTO(types=types)
 
     async def get_by_id(self, id: int) -> TaskTypeResponseDTO:
-        task: Task = await self.repository.get_by_id(id)
+        task: TaskModel = await self.repository.get_by_id(id)
         if not task:
             raise TaskNotFoundException(id)
         return TaskTypeResponseDTO(id=task.id, name=task.name)

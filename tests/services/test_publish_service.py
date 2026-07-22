@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from app.api.v1.schemas import AssetPublishDTO, AssetPublishResponseDTO
-from app.infrastructure.database import Publish
+from app.infrastructure.database import PublishModel
 from app.services.publish_service import PublishService
 
 
@@ -55,7 +55,7 @@ async def test_create_publish_success(
 
     mock_publish_repo.get_latest_version.return_value = 2
 
-    expected_publish_model = Publish(
+    expected_publish_model = PublishModel(
         asset_id=1, task_id=10, version=3, author="John Doe", fs_path="PATH"
     )
     mock_publish_repo.add.return_value = expected_publish_model
@@ -102,7 +102,7 @@ async def test_create_publish_first_version(
 
     mock_publish_repo.get_latest_version.return_value = 0
 
-    expected_publish_model = Publish(
+    expected_publish_model = PublishModel(
         asset_id=1, task_id=10, version=1, author="John Doe", fs_path="PATH"
     )
     mock_publish_repo.add.return_value = expected_publish_model
