@@ -32,13 +32,15 @@ async def add_asset(asset_dto: AssetCreateDTO, asset_service: FromDishka[AssetSe
 
 
 @router.post(
-    "/assets/publish",
+    "/assets/{asset_id}/{task_id}",
     status_code=status.HTTP_200_OK,
     response_model=AssetPublishResponseDTO,
 )
 @inject
 async def publish_asset(
     publish_service: FromDishka[PublishService],
+    asset_id: int,
+    task_id: int,
     asset_content: AssetPublishDTO = Depends(AssetPublishDTO.as_form),
     asset_file: UploadFile = File(...),
 ):
@@ -49,11 +51,13 @@ async def publish_asset(
         content_type=asset_file.content_type,
     )
 
-    logger.info(f"Publish new content={asset_content}, file={file.filename}")
+    logger.info(
+        f"Publish new content={asset_content} for asset={asset_id}, task={task_id}, file={file.filename}"
+    )
 
     publish = Publish(
-        asset=Asset(id=asset_content.asset_id),
-        task=Task(id=asset_content.task_id),
+        asset=Asset(id=asset_id),
+        task=Task(id=task_id),
         file_input=file,
         author=asset_content.author,
     )
@@ -69,7 +73,7 @@ async def publish_asset(
 
 
 @router.get(
-    "/assets/resolve",
+    "/assets",
     status_code=status.HTTP_200_OK,
     response_model=ResolveFilterResponseDTO,
 )
