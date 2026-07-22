@@ -62,7 +62,7 @@ async def publish_asset(
     logger.debug(f"Publish result: {result}")
     return AssetPublishResponseDTO(
         name=result.asset.name,
-        task=result.task.id,
+        task=result.task.name,
         version=result.version,
         filepath=result.file_path,
     )
