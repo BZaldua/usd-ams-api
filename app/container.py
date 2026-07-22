@@ -6,6 +6,7 @@ from .config.database import get_db
 from .config.minio import MinioConfig
 from .infrastructure.repositories import (
     AssetRepository,
+    MinioRepository,
     PublishRepository,
     TaskRepository,
 )
@@ -33,13 +34,14 @@ class AppProvider(Provider):
         return MinioConfig()
 
     @provide(scope=Scope.REQUEST)
-    def get_minio_client(self, config: MinioConfig) -> Minio:
-        return Minio(
+    def get_minio_repository(self, config: MinioConfig) -> MinioRepository:
+        client = Minio(
             endpoint=config.endpoint,
             access_key=config.access_key,
             secret_key=config.secret_key,
             secure=config.secure,
         )
+        return MinioRepository(client, config.bucket_name)
 
     @provide(scope=Scope.REQUEST)
     def get_asset_service(self, repository: AssetRepository) -> AssetService:
@@ -55,5 +57,6 @@ class AppProvider(Provider):
         repository: PublishRepository,
         asset_service: AssetService,
         task_service: TaskService,
+        minio_repository: MinioRepository,
     ) -> PublishService:
-        return PublishService(repository, asset_service, task_service)
+        return PublishService(repository, asset_service, task_service, minio_repository)
