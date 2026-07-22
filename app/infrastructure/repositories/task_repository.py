@@ -13,7 +13,7 @@ class TaskRepository(BaseRepository):
         tasks: list[Task] = list(result.scalars().all())
         return tasks
 
-    async def get_by_name(self, name: str) -> Optional[Task]:
-        query = select(Task).where(Task.name == name)
+    async def get_by_id(self, id: int) -> Optional[Task]:
+        query = select(Task).where(Task.id == id)
         result = await self.db.execute(query)
         return result.scalars().first()
