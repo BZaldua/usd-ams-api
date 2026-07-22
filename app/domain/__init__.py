@@ -1,3 +1,3 @@
-from .file_imput import FileInput
+from .file_input import FileInput
 
 __all__ = ["FileInput"]
