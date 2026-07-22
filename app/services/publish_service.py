@@ -1,4 +1,4 @@
-from app.api.v1.schemas import AssetPublishDTO, AssetPublishResponseDTO
+from app.domain import Publish
 from app.infrastructure.database import PublishModel
 from app.infrastructure.repositories import PublishRepository
 
@@ -17,28 +17,26 @@ class PublishService:
         self.asset_service = asset_service
         self.task_service = task_service
 
-    async def create(self, publish_dto: AssetPublishDTO) -> AssetPublishResponseDTO:
-        task = await self.task_service.get_by_id(publish_dto.task_id)
-        asset = await self.asset_service.get_by_id(publish_dto.asset_id)
+    async def create(self, publish: Publish) -> Publish:
+        task = await self.task_service.get_by_id(publish.task.id)
+        asset = await self.asset_service.get_by_id(publish.asset.id)
 
-        latest_version = await self.repository.get_latest_version(
-            publish_dto.asset_id, publish_dto.task_id
-        )
+        latest_version = await self.repository.get_latest_version(asset.id, task.id)
 
         publish = PublishModel(
-            asset_id=publish_dto.asset_id,
-            task_id=publish_dto.task_id,
+            asset_id=asset.id,
+            task_id=task.id,
             version=latest_version + 1,
-            author=publish_dto.author,
+            author=publish.author,
             fs_path="PATH",  # TODO: set a valid path
         )
 
         published_model: PublishModel = await self.repository.add(publish)
 
-        return AssetPublishResponseDTO(
-            name=asset.name,
-            task=task.name,
+        return Publish(
+            task=task,
+            asset=asset,
             version=latest_version + 1,
             is_variant=False,
-            filepath=published_model.fs_path,
+            file_path=published_model.fs_path,
         )

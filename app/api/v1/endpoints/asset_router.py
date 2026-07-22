@@ -11,7 +11,7 @@ from app.api.v1.schemas import (
     ResolveFilterDTO,
     ResolveFilterResponseDTO,
 )
-from app.domain import Asset, FileInput
+from app.domain import Asset, FileInput, Publish, Task
 from app.services import AssetService, PublishService
 
 router = APIRouter()
@@ -50,9 +50,24 @@ async def publish_asset(
     )
 
     logger.info(f"Publish new content={asset_content}, file={file.filename}")
-    result = await publish_service.create(asset_content)
+
+    publish = Publish(
+        asset=Asset(id=asset_content.asset_id),
+        task=Task(id=asset_content.task_id),
+        file_input=file,
+        author=asset_content.author,
+        is_variant=asset_content.is_variant,
+    )
+
+    result = await publish_service.create(publish)
     logger.debug(f"Publish result: {result}")
-    return result
+    return AssetPublishResponseDTO(
+        name=result.asset.name,
+        task=result.task.id,
+        version=result.version,
+        is_variant=result.is_variant,
+        filepath=result.file_path,
+    )
 
 
 @router.get(

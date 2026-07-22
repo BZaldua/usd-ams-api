@@ -4,6 +4,6 @@ from typing import Optional
 
 @dataclass(frozen=True)
 class Asset:
-    name: str
-    type: str
     id: Optional[int] = None
+    name: Optional[str] = None
+    type: Optional[str] = None

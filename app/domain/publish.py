@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
@@ -12,11 +12,12 @@ from .variant import Variant
 class Publish:
     task: Task
     asset: Asset
-    version: int
-    file: FileInput
-    author: str
-    created_at: datetime
-    name: str
-    type: str
-    variants: list[Variant]
+
+    is_variant: bool = False
+    variants: list[Variant] = field(default_factory=list)
     id: Optional[int] = None
+    version: Optional[int] = None
+    author: Optional[str] = None
+    file_input: Optional[FileInput] = None
+    file_path: Optional[str] = None
+    created_at: Optional[datetime] = None
