@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from app.api.exceptions import init_exception_handlers
-from app.api.v1.asset_router import router as asset_router
-from app.api.v1.task_router import router as task_router
+from app.api.v1.endpoints import asset_router, task_router
 from app.container import AppProvider
 
 load_dotenv()

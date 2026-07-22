@@ -4,13 +4,14 @@ from typing import Annotated
 from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 
-from app.schemas import (
+from app.api.v1.schemas import (
     AssetCreateDTO,
     AssetPublishDTO,
     AssetPublishResponseDTO,
     ResolveFilterDTO,
     ResolveFilterResponseDTO,
 )
+from app.domain import FileInput
 from app.services import AssetService, PublishService
 
 router = APIRouter()
@@ -40,7 +41,14 @@ async def publish_asset(
     asset_content: AssetPublishDTO = Depends(AssetPublishDTO.as_form),
     asset_file: UploadFile = File(...),
 ):
-    logger.info(f"Publish new content: {asset_content}")
+    file = FileInput(
+        filename=asset_file.filename,
+        content=asset_file.file,
+        size=asset_file.size,
+        content_type=asset_file.content_type,
+    )
+
+    logger.info(f"Publish new content={asset_content}, file={file.filename}")
     result = await publish_service.create(asset_content)
     logger.debug(f"Publish result: {result}")
     return result

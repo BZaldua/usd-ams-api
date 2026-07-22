@@ -1,6 +1,6 @@
+from app.api.v1.schemas import AssetPublishDTO, AssetPublishResponseDTO
 from app.infrastructure.database import Publish
 from app.infrastructure.repositories import PublishRepository
-from app.schemas import AssetPublishDTO, AssetPublishResponseDTO
 
 from .asset_service import AssetService
 from .task_service import TaskService

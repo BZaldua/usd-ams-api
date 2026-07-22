@@ -2,9 +2,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from app.api.v1.schemas import AssetCreateDTO
 from app.exceptions import AssetNotFoundException
 from app.infrastructure.database import Asset
-from app.schemas import AssetCreateDTO
 from app.services import AssetService
 
 

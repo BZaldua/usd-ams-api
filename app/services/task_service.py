@@ -1,7 +1,7 @@
+from app.api.v1.schemas import TaskTypeResponseDTO, TaskTypesResponseDTO
 from app.exceptions import TaskNotFoundException
 from app.infrastructure.database import Task
 from app.infrastructure.repositories import TaskRepository
-from app.schemas import TaskTypeResponseDTO, TaskTypesResponseDTO
 
 
 class TaskService:

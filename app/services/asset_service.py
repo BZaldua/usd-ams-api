@@ -1,7 +1,7 @@
+from app.api.v1.schemas import AssetCreateDTO
 from app.exceptions import AssetNotFoundException
 from app.infrastructure.database import Asset
 from app.infrastructure.repositories import AssetRepository
-from app.schemas import AssetCreateDTO
 
 
 class AssetService:

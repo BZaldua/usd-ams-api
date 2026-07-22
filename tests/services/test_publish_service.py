@@ -2,8 +2,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from app.api.v1.schemas import AssetPublishDTO, AssetPublishResponseDTO
 from app.infrastructure.database import Publish
-from app.schemas import AssetPublishDTO, AssetPublishResponseDTO
 from app.services.publish_service import PublishService
 
 

@@ -3,7 +3,7 @@ import logging
 from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, status
 
-from app.schemas import TaskTypesResponseDTO
+from app.api.v1.schemas import TaskTypesResponseDTO
 from app.services import TaskService
 
 router = APIRouter()
