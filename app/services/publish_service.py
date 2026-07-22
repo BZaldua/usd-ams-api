@@ -37,6 +37,5 @@ class PublishService:
             task=task,
             asset=asset,
             version=latest_version + 1,
-            is_variant=False,
             file_path=published_model.fs_path,
         )

@@ -56,7 +56,6 @@ async def publish_asset(
         task=Task(id=asset_content.task_id),
         file_input=file,
         author=asset_content.author,
-        is_variant=asset_content.is_variant,
     )
 
     result = await publish_service.create(publish)
@@ -65,7 +64,6 @@ async def publish_asset(
         name=result.asset.name,
         task=result.task.id,
         version=result.version,
-        is_variant=result.is_variant,
         filepath=result.file_path,
     )
 

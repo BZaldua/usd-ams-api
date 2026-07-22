@@ -83,7 +83,6 @@ async def test_create_publish_success(
     assert result.asset.name == "Character_Hero"
     assert result.task.name == "Modeling"
     assert result.version == 3
-    assert result.is_variant is False
     assert result.file_path == "PATH"
 
 

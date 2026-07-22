@@ -33,9 +33,6 @@ class PublishModel(Base):
 
     asset = relationship("AssetModel", back_populates="publishes")
     task = relationship("TaskModel", back_populates="publishes")
-    variants = relationship(
-        "VariantModel", back_populates="publish", cascade="all, delete-orphan"
-    )
 
     __tableargs__ = UniqueConstraint(
         "asset_id", "task_id", "version", name="uq_asset_task_version"
