@@ -11,7 +11,7 @@ from app.api.v1.schemas import (
     ResolveFilterDTO,
     ResolveFilterResponseDTO,
 )
-from app.domain import FileInput
+from app.domain import Asset, FileInput
 from app.services import AssetService, PublishService
 
 router = APIRouter()
@@ -23,11 +23,12 @@ logger = logging.getLogger(__name__)
     "/assets", status_code=status.HTTP_201_CREATED, response_model=AssetCreateDTO
 )
 @inject
-async def add_asset(asset_in: AssetCreateDTO, asset_service: FromDishka[AssetService]):
-    logger.info(f"Creating new asset: {asset_in}")
-    result = await asset_service.create(asset_in)
+async def add_asset(asset_dto: AssetCreateDTO, asset_service: FromDishka[AssetService]):
+    logger.info(f"Creating new asset: {asset_dto}")
+    new_asset = Asset(name=asset_dto.name, type=asset_dto.type)
+    result = await asset_service.create(new_asset)
     logger.debug(f"Asset creation result: {result}")
-    return result
+    return AssetCreateDTO(name=result.name, type=result.typ)
 
 
 @router.post(

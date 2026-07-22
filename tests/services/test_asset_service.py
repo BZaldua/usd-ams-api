@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from app.api.v1.schemas import AssetCreateDTO
+from app.domain import Asset
 from app.exceptions import AssetNotFoundException
 from app.infrastructure.database import AssetModel
 from app.services import AssetService
@@ -11,7 +11,7 @@ from app.services import AssetService
 @pytest.mark.asyncio
 async def test_create_returns_successfully():
     # Arrange
-    request: AssetCreateDTO = AssetCreateDTO(name="Hero", type="Character")
+    request: Asset = Asset(name="Hero", type="Character")
 
     mock_model = MagicMock(spec=AssetModel)
     mock_model.id = 1
@@ -29,7 +29,8 @@ async def test_create_returns_successfully():
     # Assert
     mock_repo.add.assert_called_once()
 
-    assert isinstance(result, AssetCreateDTO)
+    assert isinstance(result, Asset)
+    assert result.id == 1
     assert result.name == "Hero"
     assert result.type == "Character"
 
@@ -53,7 +54,8 @@ async def test_get_by_id_successfully():
     # Assert
     mock_repo.get_by_id.assert_called_once()
 
-    assert isinstance(result, AssetCreateDTO)
+    assert isinstance(result, Asset)
+    assert result.id == 2
     assert result.name == "Box"
     assert result.type == "Prop"
 
