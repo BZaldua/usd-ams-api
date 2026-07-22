@@ -1,7 +1,9 @@
 from dishka import Provider, Scope, provide
+from minio import Minio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .config.database import get_db
+from .config.minio import MinioConfig
 from .infrastructure.repositories import (
     AssetRepository,
     PublishRepository,
@@ -25,6 +27,19 @@ class AppProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def get_publish_repository(self, db_session: AsyncSession) -> PublishRepository:
         return PublishRepository(db_session)
+
+    @provide(scope=Scope.REQUEST)
+    def get_minio_config(self) -> MinioConfig:
+        return MinioConfig()
+
+    @provide(scope=Scope.REQUEST)
+    def get_minio_client(self, config: MinioConfig) -> Minio:
+        return Minio(
+            endpoint=config.endpoint,
+            access_key=config.access_key,
+            secret_key=config.secret_key,
+            secure=config.secure,
+        )
 
     @provide(scope=Scope.REQUEST)
     def get_asset_service(self, repository: AssetRepository) -> AssetService:
