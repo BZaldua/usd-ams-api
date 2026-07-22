@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from app.api.v1.schemas import TaskTypeResponseDTO, TaskTypesResponseDTO
+from app.domain import Task
 from app.exceptions import TaskNotFoundException
 from app.infrastructure.database import TaskModel
 from app.services import TaskService
@@ -32,14 +32,15 @@ async def test_get_types_returns_successfully():
     # Assert
     mock_repo.get_all.assert_called_once()
 
-    assert isinstance(result, TaskTypesResponseDTO)
-    assert len(result.types) == 2
+    assert isinstance(result, list)
+    assert all(isinstance(item, Task) for item in result)
+    assert len(result) == 2
 
-    assert result.types[0].id == 1
-    assert result.types[0].name == "Rigging"
+    assert result[0].id == 1
+    assert result[0].name == "Rigging"
 
-    assert result.types[1].id == 2
-    assert result.types[1].name == "Animation"
+    assert result[1].id == 2
+    assert result[1].name == "Animation"
 
 
 @pytest.mark.asyncio
@@ -55,8 +56,8 @@ async def test_get_types_empty_list():
 
     # Assert
     mock_repo.get_all.assert_called_once()
-    assert isinstance(result, TaskTypesResponseDTO)
-    assert len(result.types) == 0
+    assert isinstance(result, list)
+    assert len(result) == 0
 
 
 @pytest.mark.asyncio
@@ -77,7 +78,7 @@ async def test_get_by_id_successfully():
     # Assert
     mock_repo.get_by_id.assert_called_once()
 
-    assert isinstance(result, TaskTypeResponseDTO)
+    assert isinstance(result, Task)
     assert result.id == 4
     assert result.name == "Lighting"
 

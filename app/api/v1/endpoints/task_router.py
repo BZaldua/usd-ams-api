@@ -21,4 +21,4 @@ async def get_types(task_service: FromDishka[TaskService]):
     logger.info("Get task types")
     result = await task_service.get_types()
     logger.debug(f"Task types: {result}")
-    return result
+    return TaskTypesResponseDTO(types=result)
