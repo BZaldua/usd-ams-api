@@ -9,7 +9,6 @@ from app.api.v1.schemas import (
     AssetPublishDTO,
     AssetPublishResponseDTO,
     ResolveFilterDTO,
-    ResolveFilterResponseDTO,
 )
 from app.domain import Asset, FileInput, Publish, Task
 from app.services import AssetService, PublishService
@@ -68,14 +67,9 @@ async def publish_asset(
         name=result.asset.name,
         task=result.task.name,
         version=result.version,
-        filepath=result.file_path,
     )
 
 
-@router.get(
-    "/assets",
-    status_code=status.HTTP_200_OK,
-    response_model=ResolveFilterResponseDTO,
-)
+@router.get("/assets", status_code=status.HTTP_200_OK)
 def resolve_asset(filters: Annotated[ResolveFilterDTO, Query()]):
     return {"status": "OK", "message": "Asset resolved"}
