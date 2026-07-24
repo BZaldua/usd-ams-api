@@ -1,15 +1,9 @@
 import logging
-from typing import Annotated
 
 from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 
-from app.api.v1.schemas import (
-    AssetCreateDTO,
-    AssetPublishDTO,
-    AssetPublishResponseDTO,
-    ResolveFilterDTO,
-)
+from app.api.v1.schemas import AssetCreateDTO, AssetPublishDTO, AssetPublishResponseDTO
 from app.domain import Asset, FileInput, Publish, Task
 from app.services import AssetService, PublishService
 
@@ -68,8 +62,3 @@ async def publish_asset(
         task=result.task.name,
         version=result.version,
     )
-
-
-@router.get("/assets", status_code=status.HTTP_200_OK)
-def resolve_asset(filters: Annotated[ResolveFilterDTO, Query()]):
-    return {"status": "OK", "message": "Asset resolved"}
