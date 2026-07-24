@@ -20,8 +20,8 @@ class BaseRepository(Generic[T]):
     async def get_all(self) -> list[T]:
         query = select(self.model_class)
         result = await self.db.execute(query)
-        tasks: list[T] = list(result.scalars().all())
-        return tasks
+        values: list[T] = list(result.scalars().all())
+        return values
 
     async def get_by_id(self, id: int) -> Optional[T]:
         query = select(self.model_class).where(getattr(self.model_class, "id") == id)
