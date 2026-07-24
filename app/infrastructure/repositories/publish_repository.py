@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -19,3 +21,23 @@ class PublishRepository(BaseRepository[PublishModel]):
         result = await self.db.execute(query)
         latest = result.scalars().first()
         return latest if latest is not None else 0
+
+    async def get_filtered(
+        self,
+        task_id: Optional[int] = None,
+        asset_id: Optional[int] = None,
+        version: Optional[int] = None,
+    ) -> list[PublishModel]:
+        query = select(PublishModel)
+
+        if asset_id:
+            query = query.where(PublishModel.asset_id == asset_id)
+        if task_id:
+            query = query.where(PublishModel.task_id == task_id)
+        if version:
+            query = query.where(PublishModel.version == version)
+
+        query = query.order_by(PublishModel.version.desc())
+        result = await self.db.execute(query)
+        publish_models: list[PublishModel] = list(result.scalars().all())
+        return publish_models

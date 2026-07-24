@@ -9,6 +9,9 @@ from app.api.v1.schemas import (
     AssetListResponseDTO,
     AssetPublishDTO,
     AssetPublishResponseDTO,
+    AssetVersionDTO,
+    AssetVersionsResponseDTO,
+    TaskTypeResponseDTO,
 )
 from app.domain import Asset, FileInput, Publish, Task
 from app.services import AssetService, PublishService
@@ -84,15 +87,35 @@ async def publish_asset(
     )
 
 
-# @router.get(
-#     "/assets/{asset_id}/{task_id}/versions",
-#     status_code=status.HTTP_200_OK,
-#     response_model=AssetPublishedVersionsResponseDTO,
-# )
-# @inject
-# async def get_published_asset_versions(asset_id: int, task_id: int, asset_service: FromDishka[AssetService]):
-#     logger.info(f"Get published task={task_id} asset={asset_id} versions")
-#     versions = await asset_service.get_versions(task_id, asset_id)
+@router.get(
+    "/assets/{asset_id}/{task_id}/versions",
+    status_code=status.HTTP_200_OK,
+    response_model=AssetVersionsResponseDTO,
+)
+@inject
+async def get_published_asset_versions(
+    asset_id: int, task_id: int, publish_service: FromDishka[PublishService]
+):
+    logger.info(f"Get published task={task_id} asset={asset_id} versions")
+
+    published_assets = await publish_service.get_by_task_and_asset(task_id, asset_id)
+    asset = AssetCreateResponseDTO(
+        id=published_assets[0].asset.id,
+        name=published_assets[0].asset.name,
+        type=published_assets[0].asset.type,
+    )
+    task = TaskTypeResponseDTO(
+        id=published_assets[0].task.id, task=published_assets[0].task.name
+    )
+    result = AssetVersionsResponseDTO(
+        asset=asset,
+        task=task,
+        versions=[
+            AssetVersionDTO(version=pa.version, author=pa.author)
+            for pa in published_assets
+        ],
+    )
+    return result
 
 
 # @router.get(

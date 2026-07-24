@@ -1,4 +1,5 @@
 from app.domain import Publish
+from app.exceptions import NoFilteredContentFoundException
 from app.infrastructure.database import PublishModel
 from app.infrastructure.repositories import MinioRepository, PublishRepository
 
@@ -51,3 +52,19 @@ class PublishService:
             version=latest_version + 1,
             file_path=published_model.fs_path,
         )
+
+    async def get_by_task_and_asset(self, task_id: int, asset_id: int) -> list[Publish]:
+        task = await self.task_service.get_by_id(task_id)
+        asset = await self.asset_service.get_by_id(asset_id)
+
+        published_models: list[PublishModel] = await self.repository.get_filtered(
+            task.id, asset.id
+        )
+        if not published_models:
+            raise NoFilteredContentFoundException()
+
+        published_result = [
+            Publish(task=task, asset=asset, id=p.id, version=p.version, author=p.author)
+            for p in published_models
+        ]
+        return published_result

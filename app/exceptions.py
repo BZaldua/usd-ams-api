@@ -26,3 +26,10 @@ class TaskNotFoundException(NotFoundException):
 
     def __init__(self, task_id: int):
         super().__init__(f"Task ID={task_id} does not exist")
+
+
+class NoFilteredContentFoundException(NotFoundException):
+    """Business exception when some expected value is not found"""
+
+    def __init__(self):
+        super().__init__("Requested filtered content foud")

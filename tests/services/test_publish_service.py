@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from app.domain import Asset, FileInput, Publish, Task
+from app.exceptions import NoFilteredContentFoundException
 from app.infrastructure.database import PublishModel
 from app.services.publish_service import PublishService
 
@@ -12,6 +13,7 @@ from app.services.publish_service import PublishService
 def mock_publish_repo():
     repo = MagicMock()
     repo.get_latest_version = AsyncMock()
+    repo.get_filtered = AsyncMock()
     repo.add = AsyncMock()
     return repo
 
@@ -162,3 +164,79 @@ async def test_create_publish_first_version(
     assert result.version == 1
     saved_publish = mock_publish_repo.add.call_args[0][0]
     assert saved_publish.version == 1
+
+
+@pytest.mark.asyncio
+async def test_get_by_task_and_asset_success(
+    publish_service,
+    mock_publish_repo,
+    mock_asset_service,
+    mock_task_service,
+):
+    # Arrange
+    task_id = 10
+    asset_id = 1
+
+    mock_task = MagicMock(spec=Task)
+    mock_task.id = task_id
+    mock_task.name = "Modeling"
+    mock_task_service.get_by_id.return_value = mock_task
+
+    mock_asset = MagicMock(spec=Asset)
+    mock_asset.id = asset_id
+    mock_asset.name = "Character_Hero"
+    mock_asset_service.get_by_id.return_value = mock_asset
+
+    mock_publish_model = MagicMock(spec=PublishModel)
+    mock_publish_model.id = 100
+    mock_publish_model.version = 1
+    mock_publish_model.author = "John Doe"
+
+    mock_publish_repo.get_filtered.return_value = [mock_publish_model]
+
+    # Act
+    result = await publish_service.get_by_task_and_asset(task_id, asset_id)
+
+    # Assert
+    mock_task_service.get_by_id.assert_called_once_with(task_id)
+    mock_asset_service.get_by_id.assert_called_once_with(asset_id)
+    mock_publish_repo.get_filtered.assert_called_once_with(task_id, asset_id)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert isinstance(result[0], Publish)
+    assert result[0].id == 100
+    assert result[0].version == 1
+    assert result[0].author == "John Doe"
+    assert result[0].task == mock_task
+    assert result[0].asset == mock_asset
+
+
+@pytest.mark.asyncio
+async def test_get_by_task_and_asset_not_found_raises_exception(
+    publish_service,
+    mock_publish_repo,
+    mock_asset_service,
+    mock_task_service,
+):
+    # Arrange
+    task_id = 10
+    asset_id = 1
+
+    mock_task = MagicMock(spec=Task)
+    mock_task.id = task_id
+    mock_task_service.get_by_id.return_value = mock_task
+
+    mock_asset = MagicMock(spec=Asset)
+    mock_asset.id = asset_id
+    mock_asset_service.get_by_id.return_value = mock_asset
+
+    mock_publish_repo.get_filtered.return_value = []
+
+    # Act & Assert
+    with pytest.raises(NoFilteredContentFoundException):
+        await publish_service.get_by_task_and_asset(task_id, asset_id)
+
+    mock_task_service.get_by_id.assert_called_once_with(task_id)
+    mock_asset_service.get_by_id.assert_called_once_with(asset_id)
+    mock_publish_repo.get_filtered.assert_called_once_with(task_id, asset_id)
