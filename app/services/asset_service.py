@@ -8,6 +8,11 @@ class AssetService:
     def __init__(self, asset_repo: AssetRepository):
         self.repository = asset_repo
 
+    async def get_all(self) -> list[Asset]:
+        asset_models: list[AssetModel] = await self.repository.get_all()
+        assets = [Asset(id=a.id, name=a.name, type=a.type) for a in asset_models]
+        return assets
+
     async def create(self, asset: Asset) -> Asset:
         new_asset = AssetModel(name=asset.name, type=asset.type)
         saved_asset: AssetModel = await self.repository.add(new_asset)
