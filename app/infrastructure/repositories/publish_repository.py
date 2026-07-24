@@ -6,7 +6,7 @@ from app.infrastructure.database import AssetModel, PublishModel, TaskModel
 from app.infrastructure.repositories.base import BaseRepository
 
 
-class PublishRepository(BaseRepository):
+class PublishRepository(BaseRepository[PublishModel]):
     async def get_latest_version(self, asset_id: int, task_id: int) -> int:
         query = (
             select(PublishModel.version)
