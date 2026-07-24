@@ -32,7 +32,7 @@ async def add_asset(asset_dto: AssetCreateDTO, asset_service: FromDishka[AssetSe
     new_asset = Asset(name=asset_dto.name, type=asset_dto.type)
     result = await asset_service.create(new_asset)
     logger.debug(f"Asset creation result: {result}")
-    return AssetCreateResponseDTO(id=result.id, name=result.name, type=result.typ)
+    return AssetCreateResponseDTO(id=result.id, name=result.name, type=result.type)
 
 
 @router.get(
@@ -80,8 +80,10 @@ async def publish_asset(
     result = await publish_service.create(publish)
     logger.debug(f"Publish result: {result}")
     return AssetPublishResponseDTO(
-        asset=result.asset,
-        task=result.task,
+        asset=AssetCreateResponseDTO(
+            id=result.asset.id, name=result.asset.name, type=result.asset.type
+        ),
+        task=TaskTypeResponseDTO(id=result.task.id, task=result.task.name),
         version=result.version,
         author=result.author,
     )
