@@ -1,3 +1,4 @@
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.infrastructure.database import PublishModel
@@ -5,6 +6,9 @@ from app.infrastructure.repositories.base import BaseRepository
 
 
 class PublishRepository(BaseRepository[PublishModel]):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, PublishModel)
+
     async def get_latest_version(self, asset_id: int, task_id: int) -> int:
         query = (
             select(PublishModel.version)
