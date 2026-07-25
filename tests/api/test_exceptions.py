@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.exceptions import app_module_exception_handler, init_exception_handlers
-from app.exceptions import AppModuleException
+from app.domain.exceptions import AppModuleException
 
 
 class DummyAppException(AppModuleException):

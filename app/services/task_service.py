@@ -1,5 +1,5 @@
 from app.domain import Task
-from app.exceptions import TaskNotFoundException
+from app.domain.exceptions import TaskNotFoundException
 from app.infrastructure.database import TaskModel
 from app.infrastructure.repositories import TaskRepository
 

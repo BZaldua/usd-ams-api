@@ -3,7 +3,7 @@ from pathlib import Path
 from urllib3.response import HTTPResponse
 
 from app.domain import Publish
-from app.exceptions import NoFilteredContentFoundException
+from app.domain.exceptions import NoFilteredContentFoundException
 from app.infrastructure.database import PublishModel
 from app.infrastructure.repositories import MinioRepository, PublishRepository
 

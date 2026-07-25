@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from app.domain import Asset, FileInput, Publish, Task
-from app.exceptions import NoFilteredContentFoundException
+from app.domain.exceptions import NoFilteredContentFoundException
 from app.infrastructure.database import PublishModel
 from app.services.publish_service import PublishService
 

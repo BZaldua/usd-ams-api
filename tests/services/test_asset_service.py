@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from app.domain import Asset
-from app.exceptions import AssetNotFoundException
+from app.domain.exceptions import AssetNotFoundException
 from app.infrastructure.database import AssetModel
 from app.services import AssetService
 

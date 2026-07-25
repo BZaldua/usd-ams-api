@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.exceptions import AppModuleException
+from app.domain.exceptions import AppModuleException
 
 logger = logging.getLogger("app")
 
