@@ -24,14 +24,14 @@ def upgrade():
         tasks_tbl,
         [
             {"id": 1, "name": "modeling"},
-            {"id": 2, "name": "rigging"},
-            {"id": 3, "name": "texturig"},
+            {"id": 2, "name": "texturig"},
+            {"id": 3, "name": "rigging"},
             {"id": 4, "name": "layout"},
             {"id": 5, "name": "animation"},
             {"id": 6, "name": "vfx"},
             {"id": 7, "name": "lighting"},
-            {"id": 8, "name": "rendering"},
-            {"id": 9, "name": "compositing"},
+            {"id": 8, "name": "compositing"},
+            {"id": 9, "name": "rendering"},
         ],
     )
 
