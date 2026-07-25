@@ -1,5 +1,6 @@
 from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi.responses import StreamingResponse
 
 from app.api.v1.schemas import (
     AssetCreateDTO,
@@ -106,15 +107,24 @@ async def get_published_asset_versions(
     return result
 
 
-# @router.get(
-#     "/assets/{asset_id}/{task_id}/versions/{version}/download",
-#     status_code=status.HTTP_200_OK,
-#     response_model=AssetDownloadResponseDTO,
-# )
-# @inject
-# async def download_asset(asset_id: int, task_id: int, version_id: int, asset_service: FromDishka[AssetService]):
-#     logger.info(f"Get published task={task_id} asset={asset_id} version={version_id}")
-#     versions = await asset_service.download_asset(task_id, asset_id, version_id)
+@router.get(
+    "/assets/{asset_id}/{task_id}/versions/{version}/download",
+    status_code=status.HTTP_200_OK,
+)
+@inject
+async def download_asset(
+    asset_id: int,
+    task_id: int,
+    version: int,
+    publish_service: FromDishka[PublishService],
+):
+    filename, file_content = await publish_service.download(asset_id, task_id, version)
+
+    return StreamingResponse(
+        content=file_content,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 # @router.post(

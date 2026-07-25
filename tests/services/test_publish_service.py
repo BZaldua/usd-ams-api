@@ -84,7 +84,7 @@ async def test_create_publish_success(
 
     mock_publish_repo.get_latest_version.return_value = 2
 
-    fs_file_path = f"/bucket/{mock_asset.name}/{mock_task.name}/{mock_file.filename}_3"
+    fs_file_path = f"{mock_asset.name}/{mock_task.name}/v3/{mock_file.filename}"
     mock_minio_repo.save.return_value = fs_file_path
 
     expected_publish_model = PublishModel(
@@ -148,7 +148,7 @@ async def test_create_publish_first_version(
 
     mock_publish_repo.get_latest_version.return_value = 0
 
-    fs_file_path = f"/bucket/{mock_asset.name}/{mock_task.name}/{mock_file.filename}_1"
+    fs_file_path = f"{mock_asset.name}/{mock_task.name}/v1/{mock_file.filename}"
     mock_minio_repo.save.return_value = fs_file_path
 
     expected_publish_model = PublishModel(
