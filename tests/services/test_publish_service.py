@@ -22,6 +22,7 @@ def mock_publish_repo():
 def mock_minio_repo():
     repo = MagicMock()
     repo.save = MagicMock()
+    repo.get = MagicMock()
     return repo
 
 
@@ -189,6 +190,8 @@ async def test_get_by_task_and_asset_success(
 
     mock_publish_model = MagicMock(spec=PublishModel)
     mock_publish_model.id = 100
+    mock_publish_model.task_id = task_id
+    mock_publish_model.asset_id = asset_id
     mock_publish_model.version = 1
     mock_publish_model.author = "John Doe"
 
@@ -240,3 +243,55 @@ async def test_get_by_task_and_asset_not_found_raises_exception(
     mock_task_service.get_by_id.assert_called_once_with(task_id)
     mock_asset_service.get_by_id.assert_called_once_with(asset_id)
     mock_publish_repo.get_filtered.assert_called_once_with(task_id, asset_id)
+
+
+@pytest.mark.asyncio
+async def test_download_success(
+    publish_service,
+    mock_publish_repo,
+    mock_minio_repo,
+):
+    # Arrange
+    task_id = 10
+    asset_id = 1
+    version = 2
+    fake_fs_path = "/path/to/my/file.usd"
+
+    mock_publish_model = MagicMock(spec=PublishModel)
+    mock_publish_model.fs_path = fake_fs_path
+
+    mock_publish_repo.get_filtered.return_value = [mock_publish_model]
+
+    mock_http_response = MagicMock()
+    mock_minio_repo.get.return_value = mock_http_response
+
+    # Act
+    filename, response = await publish_service.download(task_id, asset_id, version)
+
+    # Assert
+    mock_publish_repo.get_filtered.assert_called_once_with(task_id, asset_id, version)
+    mock_minio_repo.get.assert_called_once_with(fake_fs_path)
+
+    assert filename == "file.usd"
+    assert response == mock_http_response
+
+
+@pytest.mark.asyncio
+async def test_download_not_found_raises_exception(
+    publish_service,
+    mock_publish_repo,
+    mock_minio_repo,
+):
+    # Arrange
+    task_id = 10
+    asset_id = 1
+    version = 2
+
+    mock_publish_repo.get_filtered.return_value = []
+
+    # Act & Assert
+    with pytest.raises(NoFilteredContentFoundException):
+        await publish_service.download(task_id, asset_id, version)
+
+    mock_publish_repo.get_filtered.assert_called_once_with(task_id, asset_id, version)
+    mock_minio_repo.get.assert_not_called()

@@ -115,3 +115,31 @@ async def test_get_published_asset_versions_success(client, publish_service_mock
     assert len(data["versions"]) == 2
     assert data["versions"][0]["version"] == 1
     assert data["versions"][1]["author"] == "User B"
+
+
+@pytest.mark.asyncio
+async def test_download_asset_endpoint_success(client, publish_service_mock):
+    # Arrange
+    asset_id = 10
+    task_id = 5
+    version = 1
+    expected_filename = "model.usd"
+    fake_content = b"fictional usd content"
+
+    publish_service_mock.download.return_value = (expected_filename, [fake_content])
+
+    # Act
+    response = await client.get(
+        f"/assets/{asset_id}/{task_id}/versions/{version}/download"
+    )
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.content == fake_content
+    assert response.headers["content-type"] == "application/octet-stream"
+    assert (
+        response.headers["content-disposition"]
+        == f'attachment; filename="{expected_filename}"'
+    )
+
+    publish_service_mock.download.assert_called_once_with(asset_id, task_id, version)
