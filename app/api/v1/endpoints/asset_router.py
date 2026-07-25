@@ -12,6 +12,7 @@ from app.api.v1.schemas import (
     AssetVersionsResponseDTO,
     TaskTypeResponseDTO,
 )
+from app.dependencies import validate_file_extension
 from app.domain import Asset, FileInput, Publish, Task
 from app.services import AssetService, PublishService
 
@@ -51,7 +52,7 @@ async def publish_asset(
     asset_id: int,
     task_id: int,
     asset_content: AssetPublishDTO = Depends(AssetPublishDTO.as_form),
-    asset_file: UploadFile = File(...),
+    asset_file: UploadFile = Depends(validate_file_extension),
 ):
     file = FileInput(
         filename=asset_file.filename,

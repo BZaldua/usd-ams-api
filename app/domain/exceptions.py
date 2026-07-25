@@ -33,3 +33,12 @@ class NoFilteredContentFoundException(NotFoundException):
 
     def __init__(self):
         super().__init__("No content found for requested filters")
+
+
+class UnsupportedFileFormat(AppModuleException):
+    """Business logic for usupported file extensions"""
+
+    status_code = 400
+
+    def __init__(self, file_extension: str):
+        super().__init__(f'Provided file extension="{file_extension}" is not supported')
