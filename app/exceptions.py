@@ -32,4 +32,4 @@ class NoFilteredContentFoundException(NotFoundException):
     """Business exception when some expected value is not found"""
 
     def __init__(self):
-        super().__init__("Requested filtered content foud")
+        super().__init__("No content found for requested filters")
