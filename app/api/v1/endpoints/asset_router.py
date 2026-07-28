@@ -1,5 +1,5 @@
 from dishka.integrations.fastapi import FromDishka, inject
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi import APIRouter, Depends, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 
 from app.api.v1.schemas import (
@@ -128,10 +128,36 @@ async def download_asset(
     )
 
 
-# @router.post(
-#     "/assets/{asset_id}/compose",
-#     status_code=status.HTTP_200_OK
-# )
-# @inject
-# async def compose_asset(asset_id: int, asset_service: FromDishka[AssetService]):
-#     versions = await asset_service.compose_asset(task_id, asset_id)
+@router.get("/assets/{asset_id}/compose", status_code=status.HTTP_200_OK)
+@inject
+async def compose_asset(
+    asset_id: int,
+    publish_service: FromDishka[PublishService],
+    model_version: int | None = Query(default=None, description="Model version"),
+    texture_version: int | None = Query(default=None, description="Texture version"),
+    rig_version: int | None = Query(default=None, description="Rig version"),
+    layout_version: int | None = Query(default=None, description="Layout version"),
+    animation_version: int | None = Query(
+        default=None, description="Animation version"
+    ),
+    vfx_version: int | None = Query(default=None, description="VFX version"),
+    light_version: int | None = Query(default=None, description="Light version"),
+):
+    asset_name, composed_content = await publish_service.compose(
+        asset_id,
+        model_version,
+        texture_version,
+        rig_version,
+        layout_version,
+        animation_version,
+        vfx_version,
+        light_version,
+    )
+
+    return StreamingResponse(
+        content=composed_content,
+        media_type="application/octet-stream",
+        headers={
+            "Content-Disposition": f'attachment; filename="{asset_name}_composed.usda"'
+        },
+    )

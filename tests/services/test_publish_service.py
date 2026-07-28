@@ -1,12 +1,12 @@
 import io
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
 
 from app.domain import Asset, FileInput, Publish, Task
 from app.domain.exceptions import NoFilteredContentFoundException
 from app.infrastructure.database import PublishModel
-from app.services.publish_service import PublishService
+from app.services.publish_service import _API_BASE_URL, _USDA_TEMPLATE, PublishService
 
 
 @pytest.fixture
@@ -295,3 +295,94 @@ async def test_download_not_found_raises_exception(
 
     mock_publish_repo.get_filtered.assert_called_once_with(task_id, asset_id, version)
     mock_minio_repo.get.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_compose_with_explicit_versions_success(
+    publish_service,
+    mock_asset_service,
+    mock_publish_repo,
+):
+    # Arrange
+    asset_id = 1
+    mock_asset = MagicMock()
+    mock_asset.name = "Hero_Character"
+    mock_asset_service.get_by_id.return_value = mock_asset
+
+    # Act
+    asset_name, composed_usda = await publish_service.compose(
+        asset_id=asset_id,
+        model_version=3,
+        texture_version=1,
+    )
+
+    # Assert
+    assert asset_name == "Hero_Character"
+    mock_asset_service.get_by_id.assert_called_once_with(asset_id)
+    assert mock_publish_repo.get_latest_version.call_count == 5
+
+    assert f"/assets/{asset_id}/1/versions/3/download" in composed_usda
+    assert f"/assets/{asset_id}/2/versions/1/download" in composed_usda
+
+
+@pytest.mark.asyncio
+async def test_compose_fetches_latest_versions_when_none_provided(
+    publish_service,
+    mock_asset_service,
+    mock_publish_repo,
+):
+    # Arrange
+    asset_id = 42
+    mock_asset = MagicMock()
+    mock_asset.name = "Props_Sword"
+    mock_asset_service.get_by_id.return_value = mock_asset
+    mock_publish_repo.get_latest_version.return_value = 5
+
+    # Act
+    asset_name, composed_usda = await publish_service.compose(asset_id=asset_id)
+
+    # Assert
+    assert asset_name == "Props_Sword"
+    assert mock_publish_repo.get_latest_version.call_count == 7
+
+    expected_calls = [
+        call(asset_id, 7),  # light
+        call(asset_id, 6),  # vfx
+        call(asset_id, 5),  # animation
+        call(asset_id, 4),  # layout
+        call(asset_id, 3),  # rig
+        call(asset_id, 2),  # texture
+        call(asset_id, 1),  # model
+    ]
+    mock_publish_repo.get_latest_version.assert_has_calls(expected_calls)
+
+    for task_type in range(1, 8):
+        expected_url = (
+            f"@{_API_BASE_URL}/assets/{asset_id}/{task_type}/versions/5/download@,"
+        )
+        assert expected_url in composed_usda
+
+
+@pytest.mark.asyncio
+async def test_compose_skips_layers_with_version_zero(
+    publish_service,
+    mock_asset_service,
+    mock_publish_repo,
+):
+    # Arrange
+    asset_id = 99
+    mock_asset = MagicMock()
+    mock_asset.name = "Environment_Room"
+    mock_asset_service.get_by_id.return_value = mock_asset
+    mock_publish_repo.get_latest_version.return_value = 0
+
+    expected_empty_usda = _USDA_TEMPLATE.format(sublayers="")
+
+    # Act
+    asset_name, composed_usda = await publish_service.compose(
+        asset_id=asset_id, rig_version=0
+    )
+
+    # Assert
+    assert asset_name == "Environment_Room"
+    assert composed_usda == expected_empty_usda

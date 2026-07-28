@@ -1,4 +1,4 @@
-from typing import Generic, Optional, Type, TypeVar
+from typing import Generic, Type, TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -23,7 +23,7 @@ class BaseRepository(Generic[T]):
         values: list[T] = list(result.scalars().all())
         return values
 
-    async def get_by_id(self, id: int) -> Optional[T]:
+    async def get_by_id(self, id: int) -> T | None:
         query = select(self.model_class).where(getattr(self.model_class, "id") == id)
         result = await self.db.execute(query)
         return result.scalars().first()

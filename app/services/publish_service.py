@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from urllib3.response import HTTPResponse
@@ -9,6 +10,16 @@ from app.infrastructure.repositories import MinioRepository, PublishRepository
 
 from .asset_service import AssetService
 from .task_service import TaskService
+
+_API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
+_USDA_TEMPLATE = """#usda 1.0
+(
+    doc = "Master dynamically by AMS"
+    subLayers = [
+{sublayers}
+    ]
+)
+"""
 
 
 class PublishService:
@@ -90,3 +101,43 @@ class PublishService:
         file_content = self.minio_repository.get(object_fs_path)
 
         return filename, file_content
+
+    async def compose(
+        self,
+        asset_id: int,
+        model_version: int | None = None,
+        texture_version: int | None = None,
+        rig_version: int | None = None,
+        layout_version: int | None = None,
+        animation_version: int | None = None,
+        vfx_version: int | None = None,
+        light_version: int | None = None,
+    ) -> tuple[str, str]:
+        composition_order = [
+            (7, light_version),
+            (6, vfx_version),
+            (5, animation_version),
+            (4, layout_version),
+            (3, rig_version),
+            (2, texture_version),
+            (1, model_version),
+        ]
+
+        sublayers = []
+        for task in composition_order:
+            version = task[1]
+            if not version:
+                version = await self.repository.get_latest_version(asset_id, task[0])
+
+            if version == 0:
+                continue
+
+            asset_download_url: str = (
+                f"{_API_BASE_URL}/assets/{asset_id}/{task[0]}/versions/{version}/download"
+            )
+            sublayers.append(f"\t\t\t@{asset_download_url}@,")
+
+        asset = await self.asset_service.get_by_id(asset_id)
+        composed_usda = _USDA_TEMPLATE.format(sublayers="\n".join(sublayers))
+
+        return asset.name, composed_usda

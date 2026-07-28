@@ -143,3 +143,74 @@ async def test_download_asset_endpoint_success(client, publish_service_mock):
     )
 
     publish_service_mock.download.assert_called_once_with(asset_id, task_id, version)
+
+
+@pytest.mark.asyncio
+async def test_compose_asset_endpoint_success_with_defaults(
+    client, publish_service_mock
+):
+    # Arrange
+    asset_id = 42
+    expected_asset_name = "Robot_Hero"
+    fake_usda_content = "#usda 1.0\n(\n\tsubLayers = []\n)"
+
+    publish_service_mock.compose.return_value = (
+        expected_asset_name,
+        [fake_usda_content],
+    )
+
+    # Act
+    response = await client.get(f"/assets/{asset_id}/compose")
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.text == fake_usda_content
+    assert response.headers["content-type"] == "application/octet-stream"
+    assert (
+        response.headers["content-disposition"]
+        == f'attachment; filename="{expected_asset_name}_composed.usda"'
+    )
+
+    publish_service_mock.compose.assert_called_once_with(
+        asset_id, None, None, None, None, None, None, None
+    )
+
+
+@pytest.mark.asyncio
+async def test_compose_asset_endpoint_success_with_query_params(
+    client, publish_service_mock
+):
+    # Arrange
+    asset_id = 7
+    expected_asset_name = "Environment_Forest"
+    fake_usda_content = (
+        "#usda 1.0\n(\n\tsubLayers = [\n\t\t@/assets/7/1/versions/3/download@\n\t]\n)"
+    )
+
+    publish_service_mock.compose.return_value = (
+        expected_asset_name,
+        [fake_usda_content],
+    )
+
+    query_params = {
+        "model_version": 3,
+        "texture_version": 1,
+        "rig_version": 0,
+        "layout_version": 2,
+        "animation_version": 5,
+        "vfx_version": 4,
+        "light_version": 1,
+    }
+
+    # Act
+    response = await client.get(f"/assets/{asset_id}/compose", params=query_params)
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.text == fake_usda_content
+    assert (
+        response.headers["content-disposition"]
+        == f'attachment; filename="{expected_asset_name}_composed.usda"'
+    )
+
+    publish_service_mock.compose.assert_called_once_with(asset_id, 3, 1, 0, 2, 5, 4, 1)

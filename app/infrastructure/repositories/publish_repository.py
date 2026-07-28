@@ -1,5 +1,3 @@
-from typing import Optional
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -24,9 +22,9 @@ class PublishRepository(BaseRepository[PublishModel]):
 
     async def get_filtered(
         self,
-        task_id: Optional[int] = None,
-        asset_id: Optional[int] = None,
-        version: Optional[int] = None,
+        task_id: int | None = None,
+        asset_id: int | None = None,
+        version: int | None = None,
     ) -> list[PublishModel]:
         query = select(PublishModel)
 

@@ -1,6 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 from .asset import Asset
 from .file_input import FileInput
@@ -12,9 +11,9 @@ class Publish:
     task: Task
     asset: Asset
 
-    id: Optional[int] = None
-    version: Optional[int] = None
-    author: Optional[str] = None
-    file_input: Optional[FileInput] = None
-    file_path: Optional[str] = None
-    created_at: Optional[datetime] = None
+    id: int | None = None
+    version: int | None = None
+    author: str | None = None
+    file_input: FileInput | None = None
+    file_path: str | None = None
+    created_at: datetime | None = None
