@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "usd-ams-api"
+version = "0.1.0"
+description = "USD Asset Management System (AMS) API"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "BZaldua"}]
+dependencies = [
+    "fastapi>=0.110.0",
+    "python-multipart>=0.0.32",
+    "sqlalchemy[asyncio]>=2.0.0", 
+    "asyncpg>=0.29.0",
+    "minio>=7.2.0",
+    "dishka>=1.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "fastapi-cli>=0.0.1",
+    "uvicorn[standard]>=0.29.0",
+    "alembic>=1.13.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-mock>=3.12.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
