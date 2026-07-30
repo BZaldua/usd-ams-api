@@ -19,7 +19,7 @@ def mock_publish_repo():
 
 
 @pytest.fixture
-def mock_minio_repo():
+def mock_object_storage_repo():
     repo = MagicMock()
     repo.save = MagicMock()
     repo.get = MagicMock()
@@ -42,13 +42,13 @@ def mock_task_service():
 
 @pytest.fixture
 def publish_service(
-    mock_publish_repo, mock_asset_service, mock_task_service, mock_minio_repo
+    mock_publish_repo, mock_asset_service, mock_task_service, mock_object_storage_repo
 ):
     return PublishService(
         publish_repo=mock_publish_repo,
         asset_service=mock_asset_service,
         task_service=mock_task_service,
-        minio_repository=mock_minio_repo,
+        object_storage_repository=mock_object_storage_repo,
     )
 
 
@@ -58,7 +58,7 @@ async def test_create_publish_success(
     mock_publish_repo,
     mock_asset_service,
     mock_task_service,
-    mock_minio_repo,
+    mock_object_storage_repo,
 ):
     # Arrange
     file_content = b"Test file content"
@@ -86,7 +86,7 @@ async def test_create_publish_success(
     mock_publish_repo.get_latest_version.return_value = 2
 
     fs_file_path = f"{mock_asset.name}/{mock_task.name}/v3/{mock_file.filename}"
-    mock_minio_repo.save.return_value = fs_file_path
+    mock_object_storage_repo.save.return_value = fs_file_path
 
     expected_publish_model = PublishModel(
         asset_id=1, task_id=10, version=3, author="John Doe", fs_path=fs_file_path
@@ -100,7 +100,7 @@ async def test_create_publish_success(
     mock_task_service.get_by_id.assert_called_once_with(10)
     mock_asset_service.get_by_id.assert_called_once_with(1)
     mock_publish_repo.get_latest_version.assert_called_once_with(1, 10)
-    mock_minio_repo.save.asset_called_once()
+    mock_object_storage_repo.save.asset_called_once()
     mock_publish_repo.add.assert_called_once()
     saved_publish = mock_publish_repo.add.call_args[0][0]
     assert saved_publish.asset_id == 1
@@ -122,7 +122,7 @@ async def test_create_publish_first_version(
     mock_publish_repo,
     mock_asset_service,
     mock_task_service,
-    mock_minio_repo,
+    mock_object_storage_repo,
 ):
     # Arrange
     file_content = b"Test file content"
@@ -150,7 +150,7 @@ async def test_create_publish_first_version(
     mock_publish_repo.get_latest_version.return_value = 0
 
     fs_file_path = f"{mock_asset.name}/{mock_task.name}/v1/{mock_file.filename}"
-    mock_minio_repo.save.return_value = fs_file_path
+    mock_object_storage_repo.save.return_value = fs_file_path
 
     expected_publish_model = PublishModel(
         asset_id=1, task_id=10, version=1, author="John Doe", fs_path=fs_file_path
@@ -161,7 +161,7 @@ async def test_create_publish_first_version(
     result = await publish_service.create(request)
 
     # Assert
-    mock_minio_repo.save.asset_called_once()
+    mock_object_storage_repo.save.asset_called_once()
     assert result.version == 1
     saved_publish = mock_publish_repo.add.call_args[0][0]
     assert saved_publish.version == 1
@@ -249,7 +249,7 @@ async def test_get_by_task_and_asset_not_found_raises_exception(
 async def test_download_success(
     publish_service,
     mock_publish_repo,
-    mock_minio_repo,
+    mock_object_storage_repo,
 ):
     # Arrange
     task_id = 10
@@ -263,14 +263,14 @@ async def test_download_success(
     mock_publish_repo.get_filtered.return_value = [mock_publish_model]
 
     mock_http_response = MagicMock()
-    mock_minio_repo.get.return_value = mock_http_response
+    mock_object_storage_repo.get.return_value = mock_http_response
 
     # Act
     filename, response = await publish_service.download(task_id, asset_id, version)
 
     # Assert
     mock_publish_repo.get_filtered.assert_called_once_with(task_id, asset_id, version)
-    mock_minio_repo.get.assert_called_once_with(fake_fs_path)
+    mock_object_storage_repo.get.assert_called_once_with(fake_fs_path)
 
     assert filename == "file.usd"
     assert response == mock_http_response
@@ -280,7 +280,7 @@ async def test_download_success(
 async def test_download_not_found_raises_exception(
     publish_service,
     mock_publish_repo,
-    mock_minio_repo,
+    mock_object_storage_repo,
 ):
     # Arrange
     task_id = 10
@@ -294,7 +294,7 @@ async def test_download_not_found_raises_exception(
         await publish_service.download(task_id, asset_id, version)
 
     mock_publish_repo.get_filtered.assert_called_once_with(task_id, asset_id, version)
-    mock_minio_repo.get.assert_not_called()
+    mock_object_storage_repo.get.assert_not_called()
 
 
 @pytest.mark.asyncio

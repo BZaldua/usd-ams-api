@@ -6,7 +6,7 @@ from urllib3.response import HTTPResponse
 from app.domain import Publish
 from app.domain.exceptions import NoFilteredContentFoundException
 from app.infrastructure.database import PublishModel
-from app.infrastructure.repositories import MinioRepository, PublishRepository
+from app.infrastructure.repositories import ObjectStorageRepository, PublishRepository
 
 from .asset_service import AssetService
 from .task_service import TaskService
@@ -28,12 +28,12 @@ class PublishService:
         publish_repo: PublishRepository,
         asset_service: AssetService,
         task_service: TaskService,
-        minio_repository: MinioRepository,
+        object_storage_repository: ObjectStorageRepository,
     ):
         self.repository = publish_repo
         self.asset_service = asset_service
         self.task_service = task_service
-        self.minio_repository = minio_repository
+        self.obj_repository = object_storage_repository
 
     async def create(self, publish: Publish) -> Publish:
         task = await self.task_service.get_by_id(publish.task.id)
@@ -45,7 +45,7 @@ class PublishService:
         sanitized_filename = publish.file_input.filename.replace(" ", "_").lower()
         object_name = f"{asset.name}/{task.name}/v{new_version}/{sanitized_filename}"
 
-        _ = self.minio_repository.save(
+        _ = self.obj_repository.save(
             object_name=object_name,
             content_type=publish.file_input.content_type,
             length=publish.file_input.size,
@@ -98,7 +98,7 @@ class PublishService:
         object_fs_path = published_models[0].fs_path
         filename: str = Path(object_fs_path).name
 
-        file_content = self.minio_repository.get(object_fs_path)
+        file_content = self.obj_repository.get(object_fs_path)
 
         return filename, file_content
 
