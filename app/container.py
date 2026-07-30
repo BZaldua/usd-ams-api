@@ -3,10 +3,10 @@ from minio import Minio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .config.database import get_db
-from .config.minio import MinioConfig
+from .config.objejct_storage import ObjectStorageConfig
 from .infrastructure.repositories import (
     AssetRepository,
-    MinioRepository,
+    ObjectStorageRepository,
     PublishRepository,
     TaskRepository,
 )
@@ -30,18 +30,20 @@ class AppProvider(Provider):
         return PublishRepository(db_session)
 
     @provide(scope=Scope.REQUEST)
-    def get_minio_config(self) -> MinioConfig:
-        return MinioConfig()
+    def get_object_storage_config(self) -> ObjectStorageConfig:
+        return ObjectStorageConfig()
 
     @provide(scope=Scope.REQUEST)
-    def get_minio_repository(self, config: MinioConfig) -> MinioRepository:
+    def get_object_storage_repository(
+        self, config: ObjectStorageConfig
+    ) -> ObjectStorageRepository:
         client = Minio(
             endpoint=config.endpoint,
             access_key=config.access_key,
             secret_key=config.secret_key,
             secure=config.secure,
         )
-        return MinioRepository(client, config.bucket_name)
+        return ObjectStorageRepository(client, config.bucket_name)
 
     @provide(scope=Scope.REQUEST)
     def get_asset_service(self, repository: AssetRepository) -> AssetService:
@@ -57,6 +59,8 @@ class AppProvider(Provider):
         repository: PublishRepository,
         asset_service: AssetService,
         task_service: TaskService,
-        minio_repository: MinioRepository,
+        object_storage_repository: ObjectStorageRepository,
     ) -> PublishService:
-        return PublishService(repository, asset_service, task_service, minio_repository)
+        return PublishService(
+            repository, asset_service, task_service, object_storage_repository
+        )

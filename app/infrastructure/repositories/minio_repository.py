@@ -4,7 +4,7 @@ from minio import Minio
 from urllib3.response import HTTPResponse
 
 
-class MinioRepository:
+class ObjectStorageRepository:
     def __init__(self, client: Minio, bucket_name: str):
         self.client = client
         self.bucket = bucket_name
