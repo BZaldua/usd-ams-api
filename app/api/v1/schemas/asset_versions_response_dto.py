@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pydantic import BaseModel, Field
 
 from .asset_create_response_dto import AssetCreateResponseDTO
