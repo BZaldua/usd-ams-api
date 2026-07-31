@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from app.api.exceptions import init_exception_handlers
-from app.api.v1.endpoints import asset_router, task_router
+from app.api.v1.endpoints import asset_router, render_router, task_router
 from app.container import AppProvider
 
 load_dotenv()
@@ -17,6 +17,7 @@ app = FastAPI(
 
 app.include_router(asset_router, prefix="/api/v1", tags=["Assets"])
 app.include_router(task_router, prefix="/api/v1", tags=["Tasks"])
+app.include_router(render_router, prefix="/api/v1", tags=["Renders"])
 init_exception_handlers(app)
 
 container = make_async_container(AppProvider())
