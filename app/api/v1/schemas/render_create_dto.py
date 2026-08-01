@@ -3,7 +3,9 @@ from pydantic import BaseModel, Field
 
 class RenderAssetVersionSelectorDTO(BaseModel):
     model_version: int | None = Field(None, description="Model version", examples=[1])
-    texture_version: int | None = Field(None, description="Texture version", examples=[4])
+    texture_version: int | None = Field(
+        None, description="Texture version", examples=[4]
+    )
     rig_version: int | None = Field(None, description="Rig version", examples=[2])
     layout_version: int | None = Field(None, description="Layout version", examples=[6])
     animation_version: int | None = Field(

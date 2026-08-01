@@ -1,7 +1,7 @@
 from dishka import make_async_container
 from dishka.integrations.fastapi import setup_dishka
 from dotenv import load_dotenv
-from fastapi import FastAPI, APIRouter
+from fastapi import APIRouter, FastAPI
 
 from app.api.exceptions import init_exception_handlers
 from app.api.v1.endpoints import asset_router, render_router, task_router

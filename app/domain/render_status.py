@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class RenderStatus(Enum):
     PENDING = 1
     IN_PROGRESS = 2
