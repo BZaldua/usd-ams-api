@@ -1,7 +1,8 @@
 from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter, status
 
-from app.api.v1.schemas import TaskTypeResponseDTO, TaskTypesResponseDTO
+from app.api.v1.mappers import TaskMapper
+from app.api.v1.schemas import TaskTypesResponseDTO
 from app.services import TaskService
 
 router = APIRouter()
@@ -13,7 +14,9 @@ router = APIRouter()
     response_model=TaskTypesResponseDTO,
 )
 @inject
-async def get_types(task_service: FromDishka[TaskService]):
+async def get_types(
+    task_service: FromDishka[TaskService], task_mapper: FromDishka[TaskMapper]
+):
     tasks = await task_service.get_types()
-    result = [TaskTypeResponseDTO(id=t.id, task=t.name) for t in tasks]
-    return TaskTypesResponseDTO(tasks=result)
+    result: TaskTypesResponseDTO = task_mapper.to_task_types_response_dto(tasks)
+    return result

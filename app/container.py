@@ -2,6 +2,7 @@ from dishka import Provider, Scope, provide
 from minio import Minio
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .api.v1.mappers import AssetMapper, TaskMapper
 from .config.database import get_db
 from .config.objejct_storage import ObjectStorageConfig
 from .infrastructure.repositories import (
@@ -64,3 +65,11 @@ class AppProvider(Provider):
         return PublishService(
             repository, asset_service, task_service, object_storage_repository
         )
+
+    @provide(scope=Scope.APP)
+    def get_task_mapper(self) -> TaskMapper:
+        return TaskMapper()
+
+    @provide(scope=Scope.APP)
+    def get_asset_mapper(self, task_mapper: TaskMapper) -> AssetMapper:
+        return AssetMapper(task_mapper=task_mapper)

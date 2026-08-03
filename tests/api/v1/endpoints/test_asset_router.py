@@ -1,35 +1,21 @@
 import pytest
 from fastapi import status
-
-
-class MockAsset:
-    def __init__(self, id, name, type):
-        self.id = id
-        self.name = name
-        self.type = type
-
-
-class MockTask:
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
-
-
-class MockPublish:
-    def __init__(self, asset, task, version, author):
-        self.asset = asset
-        self.task = task
-        self.version = version
-        self.author = author
+from utils import MockAsset, MockPublish, MockTask
 
 
 @pytest.mark.asyncio
-async def test_add_asset_success(client, asset_service_mock):
+async def test_add_asset_success(client, asset_service_mock, asset_mapper_mock):
     # Arrange
-    asset_service_mock.create.return_value = MockAsset(
-        id=1, name="Grass", type="Texture"
-    )
     payload = {"name": "Grass", "type": "Texture"}
+    mocked_asset = MockAsset(id=1, name="Grass", type="Texture")
+
+    asset_mapper_mock.to_asset.return_value = mocked_asset
+    asset_service_mock.create.return_value = mocked_asset
+    asset_mapper_mock.to_asset_create_response_dto.return_value = {
+        "id": 1,
+        "name": "Grass",
+        "type": "Texture",
+    }
 
     # Act
     response = await client.post("/assets", json=payload)
@@ -43,12 +29,19 @@ async def test_add_asset_success(client, asset_service_mock):
 
 
 @pytest.mark.asyncio
-async def test_get_all_assets_success(client, asset_service_mock):
+async def test_get_all_assets_success(client, asset_service_mock, asset_mapper_mock):
     # Arrange
-    asset_service_mock.get_all.return_value = [
+    mocked_assets = [
         MockAsset(id=1, name="Asset A", type="Character"),
         MockAsset(id=2, name="Asset B", type="Prop"),
     ]
+    asset_service_mock.get_all.return_value = mocked_assets
+    asset_mapper_mock.to_asset_list_response_dto.return_value = {
+        "assets": [
+            {"id": 1, "name": "Asset A", "type": "Character"},
+            {"id": 2, "name": "Asset B", "type": "Prop"},
+        ]
+    }
 
     # Act
     response = await client.get("/assets")
@@ -62,7 +55,7 @@ async def test_get_all_assets_success(client, asset_service_mock):
 
 
 @pytest.mark.asyncio
-async def test_publish_asset_success(client, publish_service_mock):
+async def test_publish_asset_success(client, publish_service_mock, asset_mapper_mock):
     # Arrange
     mock_publish = MockPublish(
         asset=MockAsset(id=10, name="Hero", type="Mesh"),
@@ -70,7 +63,16 @@ async def test_publish_asset_success(client, publish_service_mock):
         version=1,
         author="John Doe",
     )
+
+    asset_mapper_mock.to_publish.return_value = mock_publish
     publish_service_mock.create.return_value = mock_publish
+    asset_mapper_mock.to_asset_publish_response_dto.return_value = {
+        "id": 1,
+        "version": 1,
+        "author": "John Doe",
+        "asset": {"id": 10, "name": "Hero", "type": "Mesh"},
+        "task": {"id": 5, "task": "Modeling"},
+    }
 
     form_data = {"author": "John Doe"}
     files = {
@@ -94,15 +96,26 @@ async def test_publish_asset_success(client, publish_service_mock):
 
 
 @pytest.mark.asyncio
-async def test_get_published_asset_versions_success(client, publish_service_mock):
+async def test_get_published_asset_versions_success(
+    client, publish_service_mock, asset_mapper_mock
+):
     # Arrange
     asset_obj = MockAsset(id=20, name="Hero", type="Character")
     task_obj = MockTask(id=7, name="Animation")
-
-    publish_service_mock.get_by_task_and_asset.return_value = [
+    mocked_publishes = [
         MockPublish(asset=asset_obj, task=task_obj, version=1, author="User A"),
         MockPublish(asset=asset_obj, task=task_obj, version=2, author="User B"),
     ]
+
+    publish_service_mock.get_by_task_and_asset.return_value = mocked_publishes
+    asset_mapper_mock.to_asset_versions_response_dto.return_value = {
+        "asset": {"id": 20, "name": "Hero", "type": "Character"},
+        "task": {"id": 7, "task": "Animation"},
+        "versions": [
+            {"version": 1, "author": "User A"},
+            {"version": 2, "author": "User B"},
+        ],
+    }
 
     # Act
     response = await client.get("/assets/20/7/versions")
@@ -116,9 +129,13 @@ async def test_get_published_asset_versions_success(client, publish_service_mock
     assert data["versions"][0]["version"] == 1
     assert data["versions"][1]["author"] == "User B"
 
+    publish_service_mock.get_by_task_and_asset.assert_called_once_with(7, 20)
+
 
 @pytest.mark.asyncio
-async def test_download_asset_endpoint_success(client, publish_service_mock):
+async def test_download_asset_endpoint_success(
+    client, publish_service_mock, asset_mapper_mock
+):
     # Arrange
     asset_id = 10
     task_id = 5
@@ -126,7 +143,10 @@ async def test_download_asset_endpoint_success(client, publish_service_mock):
     expected_filename = "model.usd"
     fake_content = b"fictional usd content"
 
-    publish_service_mock.download.return_value = (expected_filename, [fake_content])
+    async def fake_iterator():
+        yield fake_content
+
+    publish_service_mock.download.return_value = (expected_filename, fake_iterator())
 
     # Act
     response = await client.get(
@@ -147,24 +167,24 @@ async def test_download_asset_endpoint_success(client, publish_service_mock):
 
 @pytest.mark.asyncio
 async def test_compose_asset_endpoint_success_with_defaults(
-    client, publish_service_mock
+    client, publish_service_mock, asset_mapper_mock
 ):
     # Arrange
     asset_id = 42
     expected_asset_name = "Robot_Hero"
-    fake_usda_content = "#usda 1.0\n(\n\tsubLayers = []\n)"
+    fake_usda_content = b"#usda 1.0\n(\n\tsubLayers = []\n)"
 
-    publish_service_mock.compose.return_value = (
-        expected_asset_name,
-        [fake_usda_content],
-    )
+    async def fake_iterator():
+        yield fake_usda_content
+
+    publish_service_mock.compose.return_value = (expected_asset_name, fake_iterator())
 
     # Act
     response = await client.get(f"/assets/{asset_id}/compose")
 
     # Assert
     assert response.status_code == status.HTTP_200_OK
-    assert response.text == fake_usda_content
+    assert response.content == fake_usda_content
     assert response.headers["content-type"] == "application/octet-stream"
     assert (
         response.headers["content-disposition"]
@@ -178,19 +198,19 @@ async def test_compose_asset_endpoint_success_with_defaults(
 
 @pytest.mark.asyncio
 async def test_compose_asset_endpoint_success_with_query_params(
-    client, publish_service_mock
+    client, publish_service_mock, asset_mapper_mock
 ):
     # Arrange
     asset_id = 7
     expected_asset_name = "Environment_Forest"
     fake_usda_content = (
-        "#usda 1.0\n(\n\tsubLayers = [\n\t\t@/assets/7/1/versions/3/download@\n\t]\n)"
+        b"#usda 1.0\n(\n\tsubLayers = [\n\t\t@/assets/7/1/versions/3/download@\n\t]\n)"
     )
 
-    publish_service_mock.compose.return_value = (
-        expected_asset_name,
-        [fake_usda_content],
-    )
+    async def fake_iterator():
+        yield fake_usda_content
+
+    publish_service_mock.compose.return_value = (expected_asset_name, fake_iterator())
 
     query_params = {
         "model_version": 3,
@@ -207,7 +227,7 @@ async def test_compose_asset_endpoint_success_with_query_params(
 
     # Assert
     assert response.status_code == status.HTTP_200_OK
-    assert response.text == fake_usda_content
+    assert response.content == fake_usda_content
     assert (
         response.headers["content-disposition"]
         == f'attachment; filename="{expected_asset_name}_composed.usda"'
